@@ -1,0 +1,43 @@
+#!/usr/local/bin/perl
+
+# check usage
+if (@ARGV != 2) {
+    print "usage: prompts2wlist.pl prompts wordlist\n\n"; 
+    exit (0);
+}
+ 
+# read in command line arguments
+  ($prompts, $wlist) = @ARGV;
+
+# open files
+  open (PROMPTS,"$prompts") || die ("Unable to open prompts $prompts file for reading");
+  open (WLIST,">$wlist") || die ("Unable to open word list $wlist file for writing");
+
+# process each prompt one at a time
+while ($line = <PROMPTS>) {
+	chop ($line);
+	@line_array=split(/ +/, $line);
+	$length=@line_array;
+	
+	# create associative away - makes finding new words really easy
+	for ($i=1; $i<$length; $i++) {
+		$next_word = @line_array[$i];
+		$result = exists($ass_array{$next_word});
+
+		# if new word, then add into the running array, 
+		# and not forgetting to add to associative array
+		if ($result == 0) {
+			$ass_array{$next_word} = 1;
+			splice(@whole_thing, -1, 0, $next_word); 
+		}
+	}
+}
+
+# put the words in order
+@word_list = sort(@whole_thing);
+
+#and finally write out to word list file
+$length=@word_list;
+for ($i=0; $i<$length; $i++) {
+	print WLIST ("\U@word_list[$i]\n");
+}
